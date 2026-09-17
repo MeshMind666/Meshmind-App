@@ -22,11 +22,19 @@ export interface CommitmentData {
   greenfieldSynced: boolean;
 }
 
+export interface HUDActionAck {
+  action: string;
+  status: string;
+  entity: string;
+  message: string;
+}
+
 export function useAgentSocket(serverUrl: string = "ws://localhost:8000/ws/agent") {
   const [isConnected, setIsConnected] = useState(false);
   const [hudAlert, setHudAlert] = useState<HUDAlertData | null>(null);
   const [lastCommitment, setLastCommitment] = useState<CommitmentData | null>(null);
   const [vaultUnlocked, setVaultUnlocked] = useState(false);
+  const [lastActionAck, setLastActionAck] = useState<HUDActionAck | null>(null);
 
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -59,6 +67,13 @@ export function useAgentSocket(serverUrl: string = "ws://localhost:8000/ws/agent
           });
         } else if (data.type === "VAULT_UNLOCKED") {
           setVaultUnlocked(true);
+        } else if (data.type === "HUD_ACTION_ACK") {
+          setLastActionAck({
+            action: data.action,
+            status: data.status,
+            entity: data.entity,
+            message: data.message,
+          });
         }
       } catch (err) {
         console.error("Error parsing WS message:", err);
@@ -101,13 +116,29 @@ export function useAgentSocket(serverUrl: string = "ws://localhost:8000/ws/agent
     }
   }, []);
 
+  const sendHUDAction = useCallback((action: string, entity: string, insightId?: string, payload?: any) => {
+    if (socketRef.current && socketRef.current.readyState === WebSocket.OPEN) {
+      socketRef.current.send(
+        JSON.stringify({
+          type: "HUD_ACTION",
+          action,
+          entity,
+          insight_id: insightId,
+          payload,
+        })
+      );
+    }
+  }, []);
+
   return {
     isConnected,
     hudAlert,
     setHudAlert,
     lastCommitment,
     vaultUnlocked,
+    lastActionAck,
     sendTranscript,
     authenticateVault,
+    sendHUDAction,
   };
 }

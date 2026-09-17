@@ -18,8 +18,10 @@ export default function Home() {
     setHudAlert,
     lastCommitment,
     vaultUnlocked,
+    lastActionAck,
     sendTranscript,
     authenticateVault,
+    sendHUDAction,
   } = useAgentSocket();
 
   const handleTranscriptChunk = (chunk: string, isFinal: boolean) => {
@@ -45,7 +47,12 @@ export default function Home() {
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-6xl mx-auto space-y-8">
       {/* Ambient Floating HUD */}
-      <FloatingHUD alert={hudAlert} onDismiss={() => setHudAlert(null)} />
+      <FloatingHUD
+        alert={hudAlert}
+        onDismiss={() => setHudAlert(null)}
+        onAction={sendHUDAction}
+        actionFeedback={lastActionAck?.message}
+      />
 
       {/* Top Navigation / Brand */}
       <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-6 border-b border-slate-800">
