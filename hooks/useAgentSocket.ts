@@ -84,8 +84,23 @@ export function useAgentSocket(serverUrl?: string) {
     };
 
     ws.onclose = () => {
-      setIsConnected(false);
+      // Check if backend is reachable via HTTP proxy before marking disconnected
+      fetch("/api/agent/health")
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.status === "ONLINE") setIsConnected(true);
+          else setIsConnected(false);
+        })
+        .catch(() => setIsConnected(false));
     };
+
+    // Initial check for HTTP proxy
+    fetch("/api/agent/health")
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.status === "ONLINE") setIsConnected(true);
+      })
+      .catch(() => {});
 
     socketRef.current = ws;
 
@@ -104,6 +119,35 @@ export function useAgentSocket(serverUrl?: string) {
           counterparty,
         })
       );
+    } else {
+      // Fallback via Next.js reverse proxy (works 100% on HTTPS tunnels like ngrok/localtunnel)
+      fetch("/api/agent/transcript", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, speaker, counterparty }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          if (data.hud_alert) {
+            setHudAlert({
+              entity: data.hud_alert.entity,
+              insights: data.hud_alert.insights,
+              hudSummary: data.hud_alert.hud_summary,
+              latencyMs: data.hud_alert.latency_ms,
+            });
+          }
+          if (data.commitment) {
+            setLastCommitment({
+              dealId: data.commitment.deal_id,
+              status: data.commitment.status,
+              terms: data.commitment.terms,
+              graphStateRoot: data.commitment.graph_state_root,
+              greenfieldSynced: data.commitment.greenfield_synced,
+            });
+          }
+          setIsConnected(true);
+        })
+        .catch((err) => console.warn("HTTP transcript fallback error:", err));
     }
   }, []);
 
@@ -130,8 +174,27 @@ export function useAgentSocket(serverUrl?: string) {
           payload,
         })
       );
+    } else {
+      // Fallback via Next.js reverse proxy
+      fetch("/api/agent/hud_action", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action, entity, insight_id: insightId, payload }),
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          setLastActionAck({
+            action: data.action,
+            status: data.status,
+            entity: data.entity,
+            message: data.message,
+          });
+          setIsConnected(true);
+        })
+        .catch((err) => console.warn("HTTP hud_action fallback error:", err));
     }
   }, []);
+
 
   return {
     isConnected,
