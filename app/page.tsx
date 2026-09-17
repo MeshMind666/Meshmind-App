@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Mic, MicOff, Shield, Cpu, Database, Blocks, Radio, Sparkles } from "lucide-react";
+import { Mic, MicOff, Shield, Cpu, Database, Blocks, Radio, Sparkles, Send, AlertCircle } from "lucide-react";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 import { useAgentSocket } from "../hooks/useAgentSocket";
 import { VoiceWaveform } from "../components/VoiceWaveform";
@@ -11,6 +11,7 @@ import { EscrowControls } from "../components/EscrowControls";
 export default function Home() {
   const [speaker, setSpeaker] = useState("Alice");
   const [counterparty, setCounterparty] = useState("David");
+  const [customInput, setCustomInput] = useState("");
 
   const {
     isConnected,
@@ -32,6 +33,9 @@ export default function Home() {
     isListening,
     transcript,
     interimTranscript,
+    isSupported,
+    isSecure,
+    error: speechError,
     startListening,
     stopListening,
     setTranscript,
@@ -43,6 +47,14 @@ export default function Home() {
     setTranscript((prev) => prev + " " + text);
     sendTranscript(text, speaker, counterparty);
   };
+
+  const handleSendCustomInput = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    if (!customInput.trim()) return;
+    handleSimulateSpeech(customInput.trim());
+    setCustomInput("");
+  };
+
 
   return (
     <main className="min-h-screen p-6 md:p-12 max-w-6xl mx-auto space-y-8">
@@ -152,8 +164,41 @@ export default function Home() {
               </button>
             </div>
 
+            {/* Mobile / Insecure HTTP Notice */}
+            {(!isSecure || speechError) && (
+              <div className="p-3.5 rounded-2xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-300 flex items-start gap-2.5">
+                <AlertCircle className="w-4 h-4 shrink-0 mt-0.5 text-amber-400" />
+                <div className="space-y-1">
+                  <p className="font-semibold text-amber-200">Lưu ý Microphone trên điện thoại:</p>
+                  <p className="text-amber-300/80 leading-relaxed">
+                    Trình duyệt di động (Safari/Chrome) yêu cầu <strong>HTTPS</strong> để mở quyền micro trực tiếp. Khi kết nối qua IP LAN HTTP, bạn hãy chạm vào ô nhập bên dưới và bấm nút <strong>Micro trên bàn phím ảo của điện thoại</strong> để nói tiếng Việt!
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {/* Direct Voice Dictation & Text Input Bar */}
+            <form onSubmit={handleSendCustomInput} className="flex gap-2">
+              <input
+                type="text"
+                value={customInput}
+                onChange={(e) => setCustomInput(e.target.value)}
+                placeholder="Nhập hoặc bấm Micro trên bàn phím điện thoại để nói..."
+                className="flex-1 px-4 py-3 rounded-2xl bg-slate-950/80 border border-slate-800 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-emerald-500/50"
+              />
+              <button
+                type="submit"
+                disabled={!customInput.trim()}
+                className="px-5 py-3 rounded-2xl bg-emerald-500 hover:bg-emerald-400 disabled:opacity-30 disabled:cursor-not-allowed text-slate-950 font-semibold text-xs transition flex items-center gap-1.5 shadow-lg shadow-emerald-500/10"
+              >
+                <Send className="w-3.5 h-3.5" />
+                <span>Gửi</span>
+              </button>
+            </form>
+
             {/* Simulation Quick-Clicks */}
             <div className="pt-2 border-t border-slate-800/80">
+
               <span className="text-[11px] text-slate-400 block mb-2 font-medium">
                 Hoặc thử các câu thoại mẫu để kiểm tra HUD &amp; Causal DAG:
               </span>

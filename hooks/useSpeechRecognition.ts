@@ -15,10 +15,20 @@ export function useSpeechRecognition({
   const [transcript, setTranscript] = useState("");
   const [interimTranscript, setInterimTranscript] = useState("");
   const [isSupported, setIsSupported] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isSecure, setIsSecure] = useState(true);
 
   const recognitionRef = useRef<any>(null);
 
   useEffect(() => {
+    if (typeof window !== "undefined") {
+      const secure =
+        window.isSecureContext ||
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1";
+      setIsSecure(secure);
+    }
+
     const SpeechRecognition =
       (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
 
@@ -58,6 +68,12 @@ export function useSpeechRecognition({
 
     recognition.onerror = (event: any) => {
       console.warn("Speech recognition event:", event.error);
+      if (event.error === "not-allowed") {
+        setError("Trình duyệt di động chặn Micro qua HTTP. Hãy dùng ô nhập/icon Mic bàn phím bên dưới hoặc bật HTTPS.");
+      } else {
+        setError(`Lỗi Micro: ${event.error}`);
+      }
+      setIsListening(false);
     };
 
     recognition.onend = () => {
@@ -83,13 +99,24 @@ export function useSpeechRecognition({
   }, [lang, onTranscriptChunk]);
 
   const startListening = useCallback(() => {
-    if (!recognitionRef.current) return;
+    setError(null);
+    // Trigger mobile OS permission prompt if available
+    if (typeof navigator !== "undefined" && navigator.mediaDevices?.getUserMedia) {
+      navigator.mediaDevices.getUserMedia({ audio: true }).catch(() => {});
+    }
+
+    if (!recognitionRef.current) {
+      setError("Trình duyệt không hỗ trợ Web Speech API trên HTTP.");
+      return;
+    }
+
     try {
       recognitionRef.current.shouldContinue = true;
       recognitionRef.current.start();
       setIsListening(true);
-    } catch (e) {
-      console.warn("Recognition already started or error:", e);
+    } catch (e: any) {
+      console.warn("Recognition start error:", e);
+      setError("Không thể bật micro. Trình duyệt di động yêu cầu kết nối bảo mật HTTPS.");
     }
   }, []);
 
@@ -108,8 +135,11 @@ export function useSpeechRecognition({
     transcript,
     interimTranscript,
     isSupported,
+    isSecure,
+    error,
     startListening,
     stopListening,
     setTranscript,
   };
 }
+
