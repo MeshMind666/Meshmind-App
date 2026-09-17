@@ -29,7 +29,7 @@ export interface HUDActionAck {
   message: string;
 }
 
-export function useAgentSocket(serverUrl: string = "ws://localhost:8000/ws/agent") {
+export function useAgentSocket(serverUrl?: string) {
   const [isConnected, setIsConnected] = useState(false);
   const [hudAlert, setHudAlert] = useState<HUDAlertData | null>(null);
   const [lastCommitment, setLastCommitment] = useState<CommitmentData | null>(null);
@@ -39,8 +39,11 @@ export function useAgentSocket(serverUrl: string = "ws://localhost:8000/ws/agent
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
+    const defaultHost = typeof window !== "undefined" ? window.location.hostname : "localhost";
+    const resolvedUrl = serverUrl || `ws://${defaultHost}:8000/ws/agent`;
     const sessionId = "session_" + Math.random().toString(36).substring(2, 9);
-    const ws = new WebSocket(`${serverUrl}?session_id=${sessionId}`);
+    const ws = new WebSocket(`${resolvedUrl}?session_id=${sessionId}`);
+
 
     ws.onopen = () => {
       console.log("Connected to Meshmind Agent Engine WebSocket");
