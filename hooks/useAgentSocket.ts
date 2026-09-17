@@ -35,6 +35,7 @@ export function useAgentSocket(serverUrl?: string) {
   const [lastCommitment, setLastCommitment] = useState<CommitmentData | null>(null);
   const [vaultUnlocked, setVaultUnlocked] = useState(false);
   const [lastActionAck, setLastActionAck] = useState<HUDActionAck | null>(null);
+  const [agentFeedback, setAgentFeedback] = useState<string | null>(null);
 
   const socketRef = useRef<WebSocket | null>(null);
 
@@ -90,6 +91,10 @@ export function useAgentSocket(serverUrl?: string) {
             entity: data.entity,
             message: data.message,
           });
+        } else if (data.type === "AGENT_FEEDBACK") {
+          if (data.agent_message) {
+            setAgentFeedback(data.agent_message);
+          }
         }
       } catch (err) {
         console.error("Error parsing WS message:", err);
@@ -158,6 +163,9 @@ export function useAgentSocket(serverUrl?: string) {
               greenfieldSynced: data.commitment.greenfield_synced,
             });
           }
+          if (data.agent_message) {
+            setAgentFeedback(data.agent_message);
+          }
           setIsConnected(true);
         })
         .catch((err) => console.warn("HTTP transcript fallback error:", err));
@@ -216,6 +224,7 @@ export function useAgentSocket(serverUrl?: string) {
     lastCommitment,
     vaultUnlocked,
     lastActionAck,
+    agentFeedback,
     sendTranscript,
     authenticateVault,
     sendHUDAction,

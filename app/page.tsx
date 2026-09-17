@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Mic, MicOff, Shield, Cpu, Database, Blocks, Radio, Sparkles, Send, AlertCircle } from "lucide-react";
+import { Mic, MicOff, Shield, Cpu, Database, Blocks, Radio, Sparkles, Send, AlertCircle, Bot } from "lucide-react";
 import { useSpeechRecognition } from "../hooks/useSpeechRecognition";
 import { useAgentSocket } from "../hooks/useAgentSocket";
 import { VoiceWaveform } from "../components/VoiceWaveform";
@@ -20,6 +20,7 @@ export default function Home() {
     lastCommitment,
     vaultUnlocked,
     lastActionAck,
+    agentFeedback,
     sendTranscript,
     authenticateVault,
     sendHUDAction,
@@ -106,7 +107,8 @@ export default function Home() {
         <section className="lg:col-span-7 space-y-6">
           {/* Voice Input Card */}
           <div className="relative overflow-hidden rounded-3xl backdrop-blur-md bg-slate-900/50 border border-slate-800 p-6 md:p-8 space-y-6 shadow-xl">
-            <div className="flex items-center justify-between">
+            {/* Header with Title & Speaker Setup */}
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <h2 className="text-base font-semibold text-white flex items-center gap-2">
                   <Radio className="w-4 h-4 text-emerald-400" />
@@ -117,24 +119,64 @@ export default function Home() {
                 </p>
               </div>
 
-              {/* Speaker Selectors */}
-              <div className="flex items-center space-x-2 text-xs">
-                <input
-                  type="text"
-                  value={speaker}
-                  onChange={(e) => setSpeaker(e.target.value)}
-                  className="w-20 px-2 py-1 rounded bg-slate-950 border border-slate-800 text-white text-center font-medium"
-                  placeholder="You"
-                />
-                <span className="text-slate-500">vs</span>
-                <input
-                  type="text"
-                  value={counterparty}
-                  onChange={(e) => setCounterparty(e.target.value)}
-                  className="w-20 px-2 py-1 rounded bg-slate-950 border border-slate-800 text-emerald-400 text-center font-medium"
-                  placeholder="Party B"
-                />
+              {/* Speaker & Counterparty Setup with Clear Labels */}
+              <div className="flex items-center gap-2 text-xs bg-slate-950/80 p-1.5 px-3 rounded-2xl border border-slate-800">
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-400 font-medium">Bạn:</span>
+                  <input
+                    type="text"
+                    value={speaker}
+                    onChange={(e) => setSpeaker(e.target.value)}
+                    className="w-16 px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-white text-center font-semibold focus:outline-none focus:border-emerald-500"
+                    placeholder="Bạn"
+                    title="Tên người nói (Speaker)"
+                  />
+                </div>
+                <span className="text-slate-600 font-bold">vs</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-slate-400 font-medium">Đối tác:</span>
+                  <input
+                    type="text"
+                    value={counterparty}
+                    onChange={(e) => setCounterparty(e.target.value)}
+                    className="w-20 px-2 py-1 rounded-lg bg-slate-900 border border-slate-700 text-emerald-400 text-center font-semibold focus:outline-none focus:border-emerald-500"
+                    placeholder="Đối tác"
+                    title="Tên đối tác đàm phán (Counterparty)"
+                  />
+                </div>
               </div>
+            </div>
+
+            {/* Quick-Select Counterparty Chips */}
+            <div className="flex flex-wrap items-center gap-2 text-xs -mt-2">
+              <span className="text-[11px] text-slate-400">Chọn nhanh đối tác:</span>
+              {[
+                { name: "David", badge: "Có nợ cũ" },
+                { name: "Acme Corp", badge: "VIP" },
+                { name: "Satoshi", badge: "Verified" },
+              ].map((p) => (
+                <button
+                  key={p.name}
+                  type="button"
+                  onClick={() => setCounterparty(p.name)}
+                  className={`px-2.5 py-1 rounded-lg border text-[11px] transition flex items-center gap-1.5 ${
+                    counterparty.toLowerCase() === p.name.toLowerCase()
+                      ? "bg-emerald-500/20 border-emerald-500/50 text-emerald-300 font-medium shadow-sm shadow-emerald-500/10"
+                      : "bg-slate-950/60 border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800"
+                  }`}
+                >
+                  <span>{p.name}</span>
+                  <span
+                    className={`text-[9px] px-1 py-0.2 rounded font-mono ${
+                      p.name === "David"
+                        ? "bg-amber-400/15 text-amber-400 border border-amber-400/30"
+                        : "bg-emerald-400/15 text-emerald-400 border border-emerald-400/30"
+                    }`}
+                  >
+                    {p.badge}
+                  </span>
+                </button>
+              ))}
             </div>
 
             {/* Audio Waveform */}
@@ -240,6 +282,28 @@ export default function Home() {
                     Chưa có âm thanh. Hãy bấm nút micro hoặc chọn câu thoại mẫu ở trên...
                   </span>
                 )}
+              </div>
+            </div>
+
+            {/* AI Agent Real-Time Feedback Sentinel */}
+            <div className="p-4 rounded-2xl bg-gradient-to-r from-emerald-950/30 via-slate-900/70 to-slate-900/50 border border-emerald-500/25 shadow-lg flex items-start gap-3.5">
+              <div className="p-2 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 shrink-0 mt-0.5">
+                <Bot className="w-5 h-5 animate-pulse" />
+              </div>
+              <div className="space-y-1 text-xs flex-1">
+                <div className="flex items-center justify-between">
+                  <span className="font-semibold text-emerald-400 flex items-center gap-1.5">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    AI Escrow Sentinel
+                  </span>
+                  <span className="text-[10px] text-slate-500 font-mono">
+                    {speaker} ↔ {counterparty}
+                  </span>
+                </div>
+                <p className="text-slate-200 leading-relaxed font-sans text-xs">
+                  {agentFeedback ||
+                    `Đang lắng nghe phiên đàm phán giữa ${speaker} & ${counterparty}. Tự động bóc tách cam kết cọc hợp đồng & cảnh báo rủi ro ngầm qua CausalDAG.`}
+                </p>
               </div>
             </div>
           </div>
