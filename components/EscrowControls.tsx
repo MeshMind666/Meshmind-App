@@ -5,7 +5,7 @@ import { useAccount, useSignMessage, useWriteContract } from "wagmi";
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import { parseEther, stringToHex, keccak256, toHex } from "viem";
 import { Lock, Unlock, ArrowRight, ShieldCheck, CheckCircle2, Loader2 } from "lucide-react";
-import { VERBA_ESCROW_ADDRESS, VERBA_ESCROW_ABI } from "../config/contracts";
+import { MESHMIND_ESCROW_ADDRESS, MESHMIND_ESCROW_ABI } from "../config/contracts";
 import { CommitmentData } from "../hooks/useAgentSocket";
 
 interface EscrowControlsProps {
@@ -32,7 +32,7 @@ export const EscrowControls: React.FC<EscrowControlsProps> = ({
     try {
       setIsSigning(true);
       const signature = await signMessageAsync({
-        message: "Sign to unlock Verba Vault",
+        message: "Sign to unlock Meshmind Vault",
       });
       onAuthenticateVault(address, signature);
     } catch (e) {
@@ -53,8 +53,8 @@ export const EscrowControls: React.FC<EscrowControlsProps> = ({
       const amount = parseEther("0.001"); // Demo 0.001 tBNB
 
       const hash = await writeContractAsync({
-        address: VERBA_ESCROW_ADDRESS as `0x${string}`,
-        abi: VERBA_ESCROW_ABI,
+        address: MESHMIND_ESCROW_ADDRESS as `0x${string}`,
+        abi: MESHMIND_ESCROW_ABI,
         functionName: "createAndFundEscrow",
         args: [dealId, contractor as `0x${string}`, arbiter, commitment.graphStateRoot as `0x${string}`],
         value: amount,

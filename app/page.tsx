@@ -52,10 +52,10 @@ export default function Home() {
         <div className="space-y-1">
           <div className="flex items-center space-x-2.5">
             <div className="h-8 w-8 rounded-xl bg-gradient-to-tr from-emerald-500 to-teal-400 flex items-center justify-center text-black font-bold shadow-lg shadow-emerald-500/20">
-              V
+              M
             </div>
             <h1 className="text-xl font-bold tracking-tight text-white flex items-center gap-2">
-              Verba-ZK Escrow
+              Meshmind ZK-Escrow
               <span className="text-[11px] font-mono font-normal px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20">
                 opBNB + Greenfield
               </span>

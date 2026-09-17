@@ -1,8 +1,9 @@
 export const OPBNB_TESTNET_CHAIN_ID = 5611;
 
-export const VERBA_ESCROW_ADDRESS = "0x794b1C35E2D27027BfB20199dDfe44aC9142A999"; // Default testnet deployment placeholder
+export const MESHMIND_ESCROW_ADDRESS = "0x794b1C35E2D27027BfB20199dDfe44aC9142A999"; // Default testnet deployment placeholder
+export const VERBA_ESCROW_ADDRESS = MESHMIND_ESCROW_ADDRESS;
 
-export const VERBA_ESCROW_ABI = [
+export const MESHMIND_ESCROW_ABI = [
   {
     "anonymous": false,
     "inputs": [
@@ -85,7 +86,7 @@ export const VERBA_ESCROW_ABI = [
           { "internalType": "uint256", "name": "createdAt", "type": "uint256" },
           { "internalType": "uint256", "name": "updatedAt", "type": "uint256" }
         ],
-        "internalType": "struct VerbaEscrow.EscrowDeal",
+        "internalType": "struct MeshmindEscrow.EscrowDeal",
         "name": "",
         "type": "tuple"
       }
@@ -94,3 +95,5 @@ export const VERBA_ESCROW_ABI = [
     "type": "function"
   }
 ] as const;
+
+export const VERBA_ESCROW_ABI = MESHMIND_ESCROW_ABI;

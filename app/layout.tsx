@@ -3,7 +3,7 @@ import type { Metadata } from "next";
 import { Providers } from "./providers";
 
 export const metadata: Metadata = {
-  title: "Verba-ZK Escrow | Sovereign Voice AI Escrow",
+  title: "Meshmind | Sovereign Voice AI Escrow",
   description: "Autonomous real-time voice escrow on opBNB and BNB Greenfield with CausalDAG Memory.",
 };
 

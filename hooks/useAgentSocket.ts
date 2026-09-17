@@ -35,7 +35,7 @@ export function useAgentSocket(serverUrl: string = "ws://localhost:8000/ws/agent
     const ws = new WebSocket(`${serverUrl}?session_id=${sessionId}`);
 
     ws.onopen = () => {
-      console.log("Connected to Verba-ZK Agent Engine WebSocket");
+      console.log("Connected to Meshmind Agent Engine WebSocket");
       setIsConnected(true);
     };
 

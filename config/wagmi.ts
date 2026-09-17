@@ -24,7 +24,7 @@ export const opBNBTestnet = defineChain({
 });
 
 export const wagmiConfig = getDefaultConfig({
-  appName: "Verba-ZK-Escrow",
+  appName: "Meshmind ZK-Escrow",
   projectId: "991e0a293817f8b91938b8d910293817", // Public demo ProjectId
   chains: [opBNBTestnet],
   ssr: true,
