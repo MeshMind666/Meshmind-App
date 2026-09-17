@@ -59,10 +59,12 @@ export function useSpeechRecognition({
       if (finalChunk) {
         setTranscript((prev) => prev + finalChunk);
         setInterimTranscript("");
+        // Only send to backend on final confirmed speech (not interim)
         onTranscriptChunk?.(finalChunk.trim(), true);
       } else if (currentInterim) {
+        // Update UI display only — do NOT send interim to backend
+        // (prevents false HUD triggers from unfinished speech)
         setInterimTranscript(currentInterim);
-        onTranscriptChunk?.(currentInterim.trim(), false);
       }
     };
 
