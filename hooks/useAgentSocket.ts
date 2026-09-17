@@ -39,8 +39,21 @@ export function useAgentSocket(serverUrl?: string) {
   const socketRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
-    const defaultHost = typeof window !== "undefined" ? window.location.hostname : "localhost";
-    const resolvedUrl = serverUrl || `ws://${defaultHost}:8000/ws/agent`;
+    // Resolve WebSocket URL with env var support (for Vercel / production)
+    let resolvedUrl: string | undefined = serverUrl || process.env.NEXT_PUBLIC_WS_URL;
+    if (!resolvedUrl) {
+      if (typeof window !== "undefined") {
+        const isSecure = window.location.protocol === "https:";
+        const host = window.location.hostname;
+        if (host === "localhost" || host === "127.0.0.1") {
+          resolvedUrl = "ws://localhost:8000/ws/agent";
+        } else {
+          resolvedUrl = (isSecure ? "wss" : "ws") + "://169.58.197.144.sslip.io/ws/agent";
+        }
+      } else {
+        resolvedUrl = "ws://localhost:8000/ws/agent";
+      }
+    }
     const sessionId = "session_" + Math.random().toString(36).substring(2, 9);
     const ws = new WebSocket(`${resolvedUrl}?session_id=${sessionId}`);
 

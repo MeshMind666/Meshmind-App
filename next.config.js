@@ -14,10 +14,14 @@ const nextConfig = {
     return config;
   },
   async rewrites() {
+    const backendUrl =
+      process.env.BACKEND_URL ||
+      process.env.NEXT_PUBLIC_BACKEND_URL ||
+      "https://169.58.197.144.sslip.io";
     return [
       {
         source: "/api/agent/:path*",
-        destination: "http://127.0.0.1:8000/api/:path*",
+        destination: `${backendUrl}/api/:path*`,
       },
     ];
   },
