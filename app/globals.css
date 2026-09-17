@@ -1,0 +1,16 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --foreground-rgb: 255, 255, 255;
+  --background-start-rgb: 10, 11, 14;
+  --background-end-rgb: 17, 20, 29;
+}
+
+body {
+  color: rgb(var(--foreground-rgb));
+  background: radial-gradient(circle at 50% 0%, #17212e 0%, #0a0b0e 100%);
+  min-height: 100vh;
+  font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+}
