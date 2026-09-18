@@ -1,8 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
-import { AlertTriangle, ShieldAlert, Sparkles, X, Zap, ShieldCheck, CheckCircle2, ArrowRight } from "lucide-react";
+import { AlertTriangle, ShieldAlert, Sparkles, X, Zap, ShieldCheck, CheckCircle2, ArrowRight, Network, ChevronDown, ChevronUp } from "lucide-react";
 import { HUDAlertData } from "../hooks/useAgentSocket";
+import { SubgraphVisualizer } from "./SubgraphVisualizer";
 
 interface FloatingHUDProps {
   alert: HUDAlertData | null;
@@ -19,6 +20,7 @@ export const FloatingHUD: React.FC<FloatingHUDProps> = ({
 }) => {
   const [activeActions, setActiveActions] = useState<{ [key: string]: boolean }>({});
   const [resolvedMap, setResolvedMap] = useState<{ [key: string]: boolean }>({});
+  const [showGraph, setShowGraph] = useState(false);
 
   if (!alert) return null;
 
@@ -130,6 +132,29 @@ export const FloatingHUD: React.FC<FloatingHUDProps> = ({
             );
           })}
         </div>
+
+        {/* 2-Hop Subgraph Provenance Toggle */}
+        {alert.subgraph && alert.subgraph.nodes && alert.subgraph.nodes.length > 0 && (
+          <div className="mt-3 pt-2 border-t border-slate-800/80">
+            <button
+              type="button"
+              onClick={() => setShowGraph(!showGraph)}
+              className="flex items-center justify-between w-full text-[11px] text-emerald-400 hover:text-emerald-300 font-medium transition py-1"
+            >
+              <span className="flex items-center gap-1.5">
+                <Network className="w-3.5 h-3.5 text-emerald-400" />
+                <span>Xem đồ thị quan hệ 2-hop (Graph Provenance)</span>
+              </span>
+              {showGraph ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+            </button>
+
+            {showGraph && (
+              <div className="mt-2 animate-fadeIn">
+                <SubgraphVisualizer subgraph={alert.subgraph} />
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Action Layer Controls (Interactive Buttons) */}
         <div className="mt-4 pt-3 border-t border-slate-800/80 space-y-2">

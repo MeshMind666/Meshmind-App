@@ -7,6 +7,7 @@ import { useAgentSocket } from "../hooks/useAgentSocket";
 import { VoiceWaveform } from "../components/VoiceWaveform";
 import { FloatingHUD } from "../components/FloatingHUD";
 import { EscrowControls } from "../components/EscrowControls";
+import { CounterpartyDossier } from "../components/CounterpartyDossier";
 
 export default function Home() {
   const [speaker, setSpeaker] = useState("Alice");
@@ -24,6 +25,7 @@ export default function Home() {
     sendTranscript,
     authenticateVault,
     sendHUDAction,
+    exportContextPod,
   } = useAgentSocket();
 
   const handleTranscriptChunk = (chunk: string, isFinal: boolean) => {
@@ -179,6 +181,12 @@ export default function Home() {
               ))}
             </div>
 
+            {/* Counterparty CRM Profile & Dossier */}
+            <CounterpartyDossier
+              counterparty={counterparty}
+              onEnforceEscrow={() => sendHUDAction("ENFORCE_ESCROW", counterparty)}
+            />
+
             {/* Audio Waveform */}
             <VoiceWaveform isListening={isListening} />
 
@@ -263,6 +271,15 @@ export default function Home() {
                   <Sparkles className="w-3.5 h-3.5 text-emerald-400" />
                   <span>Chốt kèo 500 USDT (Create DAG Node)</span>
                 </button>
+                <button
+                  onClick={() =>
+                    handleSimulateSpeech("Tôi xác nhận nghiệm thu và đồng ý giải ngân cho đối tác.")
+                  }
+                  className="px-3 py-1.5 rounded-lg bg-slate-950 hover:bg-slate-800 border border-slate-800 text-purple-300 transition flex items-center gap-1.5"
+                >
+                  <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                  <span>Nghiệm thu &amp; Giải ngân (Release opBNB)</span>
+                </button>
               </div>
             </div>
 
@@ -316,6 +333,7 @@ export default function Home() {
             commitment={lastCommitment}
             vaultUnlocked={vaultUnlocked}
             onAuthenticateVault={authenticateVault}
+            onExportPod={exportContextPod}
           />
 
           {/* 6-Tier Architecture Verification Badge */}

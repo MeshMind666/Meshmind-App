@@ -17,7 +17,7 @@ const nextConfig = {
     const backendUrl =
       process.env.BACKEND_URL ||
       process.env.NEXT_PUBLIC_BACKEND_URL ||
-      "https://169.58.197.144.sslip.io";
+      (process.env.NODE_ENV === "development" ? "http://localhost:8000" : "https://169.58.197.144.sslip.io");
     return [
       {
         source: "/api/agent/:path*",

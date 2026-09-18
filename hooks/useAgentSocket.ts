@@ -7,6 +7,7 @@ export interface HUDAlertData {
   insights: Array<{ relation: string; detail: string; type: string }>;
   hudSummary: string;
   latencyMs: number;
+  subgraph?: any;
 }
 
 export interface CommitmentData {
@@ -73,6 +74,7 @@ export function useAgentSocket(serverUrl?: string) {
             insights: data.insights,
             hudSummary: data.hud_summary,
             latencyMs: data.latency_ms,
+            subgraph: data.subgraph,
           });
         } else if (data.type === "COMMITMENT_RECORDED") {
           setLastCommitment({
@@ -152,6 +154,7 @@ export function useAgentSocket(serverUrl?: string) {
               insights: data.hud_alert.insights,
               hudSummary: data.hud_alert.hud_summary,
               latencyMs: data.hud_alert.latency_ms,
+              subgraph: data.hud_alert.subgraph,
             });
           }
           if (data.commitment) {
@@ -216,6 +219,22 @@ export function useAgentSocket(serverUrl?: string) {
     }
   }, []);
 
+  const exportContextPod = useCallback(async (sessionId: string = "default_session") => {
+    try {
+      const res = await fetch("/api/agent/vault/export_pod", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ session_id: sessionId }),
+      });
+      if (res.ok) {
+        return await res.json();
+      }
+      return null;
+    } catch (err) {
+      console.warn("Error exporting context pod:", err);
+      return null;
+    }
+  }, []);
 
   return {
     isConnected,
@@ -228,5 +247,6 @@ export function useAgentSocket(serverUrl?: string) {
     sendTranscript,
     authenticateVault,
     sendHUDAction,
+    exportContextPod,
   };
 }
